@@ -249,7 +249,7 @@ def find_court(
     :param date_found: Date object
     :param strict_dates: Boolean that helps tell the system how to handle
     :param location: Where the court is located.
-    :allow_partial_matches: Allow partial string matches useful if given a sent.
+    :param allow_partial_matches: Allow partial string matches useful if given a sent.
     :return: List of court IDs if any
     """
     court_str = strip_punc(court_str)
