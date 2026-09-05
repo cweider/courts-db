@@ -253,8 +253,11 @@ def find_court(
     :return: List of court IDs if any
     """
     court_str = strip_punc(court_str)
+    partial_matches_bool = (
+        allow_partial_matches if allow_partial_matches is not None else False
+    )
     matches = find_court_ids_by_name(
-        court_str, bankruptcy, location, allow_partial_matches
+        court_str, bankruptcy, location, partial_matches_bool
     )
 
     # Check bankruptcy cases if appropriate
