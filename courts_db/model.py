@@ -64,7 +64,7 @@ class DateRange(TypedDict):
 @final
 class CourtDict(TypedDict):
     active: NotRequired[bool]
-    case_types: NotRequired[list[str] | str | None]  # consolidate
+    case_types: NotRequired[list[str]]
     citation_string: str
     court_url: NotRequired[str | None]
     dates: list[DateRange]
