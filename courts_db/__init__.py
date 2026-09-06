@@ -166,18 +166,19 @@ def filter_courts_by_date(
     filtered_results = []
     for result in results:
         for date_object in result["dates"]:
-            date_start = date_object["start"]
-            date_end = date_object["end"]
-            if not strict_dates:
-                if date_start is None:
-                    date_start = "1600-01-01"
-                if date_end is None:
-                    date_end = "2100-01-01"
-            if strict_dates:
-                if date_start is None:
-                    continue
-                if date_end is None:
-                    date_end = "2100-01-01"
+            optional_date_start = date_object["start"]
+            if optional_date_start is not None:
+                date_start = optional_date_start
+            else:
+                date_start = "1600-01-01"
+                if strict_dates:
+                    continue  # Skipped if strict
+
+            optional_date_end = date_object["end"]
+            if optional_date_end is not None:
+                date_end = optional_date_end
+            else:
+                date_end = "2100-01-01"
 
             date_start = datetime.strptime(date_start, "%Y-%m-%d")
             date_end = datetime.strptime(date_end, "%Y-%m-%d")
