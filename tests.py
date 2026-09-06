@@ -54,6 +54,16 @@ class DataTest(CourtsDBTestCase):
                     found_courts = find_court_by_id(reference)
                     self.assertGreater(len(found_courts), 0)
 
+    def test_appeal_to_courts(self):
+        """Can we find the appeal_to court"""
+
+        for court in self.courts:
+            reference = court.get("appeal_to")
+            if reference is not None:
+                with self.subTest(court_id=court["id"]):
+                    found_courts = find_court_by_id(reference)
+                    self.assertGreater(len(found_courts), 0)
+
     def test_all_example(self):
         """Can we extract the correct court id from string and date?"""
 

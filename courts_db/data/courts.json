@@ -104,7 +104,7 @@
         "type": "appellate"
     },
     {
-        "appeal_to": "colr",
+        "appeal_to": "ala",
         "citation_string": "",
         "dates": [
             {
@@ -4069,7 +4069,7 @@
     },
     {
         "active": true,
-        "appeal_to": "Court of Common Pleas",
+        "appeal_to": "delctcompl",
         "citation_string": "",
         "dates": [
             {
