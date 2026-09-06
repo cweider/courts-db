@@ -76,7 +76,6 @@ class CourtDict(TypedDict):
     regex: list[str]
     system: str
     type: str | None
-    bankruptcy: NotRequired[None]  # wrong
     notes: NotRequired[str | None]
     name_abbreviation: NotRequired[str | None]
     jurisdiction: NotRequired[str | None]
