@@ -66,7 +66,7 @@ class CourtDict(TypedDict):
     active: NotRequired[bool]
     case_types: NotRequired[list[str]]
     citation_string: str
-    court_url: NotRequired[str | None]
+    court_url: NotRequired[str]
     dates: list[DateRange]
     examples: list[str]
     id: str
