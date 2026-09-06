@@ -55,9 +55,7 @@ To get the types of all of the
 class DateRange(TypedDict):
     start: str | None  # YYYY-MM-DD
     end: str | None  # YYYY-MM-DD
-    reorganization_dates: NotRequired[list[str]]
-    reorganization: NotRequired[list[str] | str]  # consolidate
-    reorg: NotRequired[list[str]]  # consolidate
+    reorganization: NotRequired[list[str]]
     notes: NotRequired[str]
     name: NotRequired[str]
     reason: NotRequired[str]
@@ -78,7 +76,6 @@ class CourtDict(TypedDict):
     regex: list[str]
     system: str
     type: str | None
-    reorganization_dates: NotRequired[list[str]]  # go to dates?
     url: NotRequired[str]  # consolidate
     bankruptcy: NotRequired[None]  # wrong
     notes: NotRequired[str | None]
