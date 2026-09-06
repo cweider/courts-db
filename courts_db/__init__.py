@@ -228,7 +228,7 @@ def _filter_parents_from_list(matches: list[str]) -> list[str]:
     parents = []
     for match in matches:
         parent = find_court_by_id(match)[0].get("parent", None)
-        if parent in matches:
+        if parent is not None and parent in matches:
             parents.append(parent)
     if parents:
         matches = list(set(matches) ^ set(parents))
