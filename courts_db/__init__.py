@@ -111,11 +111,12 @@ def find_court_ids_by_name(
         matches = reduce_court_list(matches)
 
     matched_strings = [m[0] for m in matches]
-    filtered_list = filter(
-        lambda x: [x for i in matched_strings if x in i and x != i] == [],
-        matched_strings,
-    )
-    for item in list(filtered_list):
+    filtered_list = [
+        s
+        for s in matched_strings
+        if not any(s in i and s != i for i in matched_strings)
+    ]
+    for item in filtered_list:
         for mat in matches:
             if item == mat[0]:
                 court_matches.add(mat[1])
