@@ -3,6 +3,9 @@ import os
 import re
 from glob import iglob
 from string import Template
+from typing import NamedTuple, cast, final
+
+from courts_db.model import CourtDict
 
 db_root = os.path.dirname(os.path.realpath(__file__))
 
@@ -116,14 +119,14 @@ ordinals = [
 #     return cd
 
 
-def make_court_dictionary(courts: list[dict]) -> dict[str, dict]:
+def make_court_dictionary(courts: list[CourtDict]) -> dict[str, CourtDict]:
     cd = {}
     for court in courts:
         cd[court["id"]] = court
     return cd
 
 
-def load_courts_db() -> list[dict]:
+def load_courts_db() -> list[CourtDict]:
     """Load the court data from disk, and render regex variables
 
     Court data is on disk as one main JSON file, another containing variables,
@@ -135,7 +138,8 @@ def load_courts_db() -> list[dict]:
     with open(
         os.path.join(db_root, "data", "variables.json"), encoding="utf-8"
     ) as v:
-        variables = json.load(v)
+        # Load data. No validation of the structure is performed.
+        variables = cast(dict[str, str], json.load(v))
 
     for path in iglob(os.path.join(db_root, "data", "places", "*.txt")):
         with open(path, encoding="utf-8") as p:
@@ -160,7 +164,8 @@ def load_courts_db() -> list[dict]:
     ) as f:
         s = Template(temp).substitute(**variables)
     s = s.replace("\\", "\\\\")
-    data = json.loads(s)
+    # Load data. No validation of the structure is performed.
+    data = cast(list[CourtDict], json.loads(s))
 
     for k in data:
         # If a child of a parent court - add parent data to child if not present
@@ -179,7 +184,17 @@ def load_courts_db() -> list[dict]:
     return data
 
 
-def gather_regexes(courts: list[dict]) -> list[tuple]:
+@final
+class CourtPatterns(NamedTuple):
+    regex: re.Pattern[str]
+    id: str
+    name: str
+    type: str | None
+    location: str | None
+    parent: str | None
+
+
+def gather_regexes(courts: list[CourtDict]) -> list[CourtPatterns]:
     """Create a variable mapping regexes to court IDs
 
     :param courts: The court DB
@@ -190,7 +205,7 @@ def gather_regexes(courts: list[dict]) -> list[tuple]:
     'Supreme Court of Alabama', 'appellate')
     :rtype: list
     """
-    regexes = []
+    regexes: list[CourtPatterns] = []
     for court in courts:
         court_regexes = court["regex"] + [court["name"]]
         for reg_str in court_regexes:
@@ -198,7 +213,7 @@ def gather_regexes(courts: list[dict]) -> list[tuple]:
             reg_str = reg_str.replace("\\\\", "\\")
             regex = re.compile(reg_str, (re.I | re.U))
             regexes.append(
-                (
+                CourtPatterns(
                     regex,
                     court["id"],
                     court["name"],

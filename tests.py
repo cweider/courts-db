@@ -8,7 +8,9 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from unittest import TestCase
 
-from courts_db import find_court, find_court_by_id
+from pydantic import TypeAdapter, ValidationError
+
+from courts_db import CourtDict, find_court, find_court_by_id
 from courts_db.text_utils import strip_punc
 from courts_db.utils import db_root, load_courts_db
 
@@ -146,6 +148,7 @@ class ExamplesTest(CourtsDBTestCase):
 
 class JsonTest(CourtsDBTestCase):
     def setUp(self) -> None:
+        super().setUp()
         self.name_regex = r'"name": "(?P<name>.*)",'
         self.court_regex = r"(^\s{4}?{)((.*\n){1,100}?)(\s{4}?},)"
         self.id_regex = r'"id": ("(?P<id>.*)"|null)'
@@ -177,6 +180,40 @@ class JsonTest(CourtsDBTestCase):
             id = re.search(self.id_regex, court).group("id")
             name = re.search(self.name_regex, court).group("name")
             print(f"Issues with ({id}) -- {name}")
+
+    def test_courts_structure(self):
+        """
+        There’s no validation in the read path; Make sure that the JSON data
+        is in the shape that we expect.
+        """
+        type_adapter = TypeAdapter(list[CourtDict])
+
+        with open(
+            os.path.join(db_root, "data", "courts.json"),
+            encoding="utf-8",
+        ) as f:
+            data = f.read()
+
+        # We directly validate json data so that useful line numbers are given.
+        type_adapter.validate_json(data, extra="forbid")
+
+        # Make test would fail when required key is missing
+        modified_court = self.courts[0].copy()
+        del modified_court["id"]
+        with self.assertRaises(ValidationError):
+            type_adapter.validate_python(modified_court, extra="forbid")
+
+        # Make test would fail when value is the wrong type
+        modified_court = self.courts[0].copy()
+        modified_court["id"] = 123
+        with self.assertRaises(ValidationError):
+            type_adapter.validate_python(modified_court, extra="forbid")
+
+        # Make test would fail if extra key was present
+        with self.assertRaises(ValidationError):
+            modified_court = self.courts[0].copy()
+            modified_court["NotAKeyThatWouldEverBePresent"] = True
+            type_adapter.validate_python([modified_court], extra="forbid")
 
     def test_unique_ids(self):
         """Are all court ids unique?"""

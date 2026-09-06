@@ -1,8 +1,10 @@
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 
+from courts_db.model import CourtDict
 from courts_db.text_utils import strip_punc
+from courts_db.utils import CourtPatterns
 
 from .utils import gather_regexes, load_courts_db, make_court_dictionary
 
@@ -25,11 +27,15 @@ def __getattr__(name: object) -> object:
     if name == "courts":
         value = load_courts_db()
     elif name == "court_dict":
-        from . import courts
+        from . import courts as dynamically_imported_courts
+
+        courts = cast(list[CourtDict], dynamically_imported_courts)
 
         value = make_court_dictionary(courts)
     elif name == "regexes":
-        from . import courts
+        from . import courts as dynamically_imported_courts
+
+        courts = cast(list[CourtDict], dynamically_imported_courts)
 
         value = gather_regexes(courts)
     else:
@@ -50,7 +56,11 @@ def find_court_ids_by_name(
     :param bankruptcy: Are we searhing for a bankruptcy court
     :return: List of Court IDs matched
     """
-    from . import regexes
+    from . import courts as dynamically_imported_courts
+    from . import regexes as dynamically_imported_regexes
+
+    courts = cast(list[CourtDict], dynamically_imported_courts)
+    regexes = cast(list[CourtPatterns], dynamically_imported_regexes)
 
     assert isinstance(court_str, str), (
         f"court_str is not a text type, it's of type {type(court_str)}"
@@ -87,7 +97,7 @@ def find_court_ids_by_name(
 
     # If no matches found - check against - Court Name - not regex patterns.
     if not matches:
-        for court in courts:  # noqa: F821  courts is imported lazily via __getattr__
+        for court in courts:
             # Add validation for location if provided.
             if location and court_location != location:
                 continue
@@ -144,7 +154,9 @@ def filter_courts_by_date(
     null dates in courts-db
     :return: List of court IDs matched
     """
-    from . import courts
+    from . import courts as dynamically_imported_courts
+
+    courts = cast(list[CourtDict], dynamically_imported_courts)
 
     assert type(date_found) is datetime, (
         f"date_found is not a date object, it's of type {type(date_found)}"
@@ -179,7 +191,9 @@ def filter_courts_by_date(
 def filter_courts_by_bankruptcy(
     matches: list[str], bankruptcy: Optional[bool]
 ) -> list[str]:
-    from . import courts
+    from . import courts as dynamically_imported_courts
+
+    courts = cast(list[CourtDict], dynamically_imported_courts)
 
     results = [court for court in courts if court["id"] in matches]
     if bankruptcy:
@@ -189,13 +203,15 @@ def filter_courts_by_bankruptcy(
     return [court["id"] for court in results if court["type"] != "bankruptcy"]
 
 
-def find_court_by_id(court_id: str) -> list[dict]:
+def find_court_by_id(court_id: str) -> list[CourtDict]:
     """Find court dictionary using court id code.
 
     :param court_id: Court code used by Courtlistener.com
     :return: Return dictionary court object from db
     """
-    from . import courts
+    from . import courts as dynamically_imported_courts
+
+    courts = cast(list[CourtDict], dynamically_imported_courts)
 
     return [court for court in courts if court["id"] == court_id]
 
