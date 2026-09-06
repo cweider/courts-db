@@ -152,12 +152,10 @@ def load_courts_db() -> list[CourtDict]:
         os.path.join(db_root, "data", "courts.json"), encoding="utf-8"
     ) as f:
         temp = f.read()
-        ord_arrays = re.findall(r"\${(\d+)-(\d+)}", temp)
+        ord_arrays = re.finditer(r"\${(\d+)-(\d+)}", temp)
         for ord in ord_arrays:
-            re_ord = (
-                f"(({')|('.join(ordinals[int(ord[0]) - 1 : int(ord[1])])}))"
-            )
-            temp = temp.replace(f"${{{ord[0]}-{ord[1]}}}", re_ord)
+            re_ord = f"(({')|('.join(ordinals[int(ord.group(1)) - 1 : int(ord.group(2))])}))"
+            temp = temp.replace(f"${{{ord.group(1)}-{ord.group(2)}}}", re_ord)
 
     with open(
         os.path.join(db_root, "data", "courts.json"), encoding="utf-8"
