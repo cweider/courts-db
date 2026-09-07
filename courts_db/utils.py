@@ -165,20 +165,6 @@ def load_courts_db() -> list[CourtDict]:
     # Load data. No validation of the structure is performed.
     data = cast(list[CourtDict], json.loads(s))
 
-    for k in data:
-        # If a child of a parent court - add parent data to child if not present
-        # this should allow for streamed down data.  Inheritance
-        if "parent" in k and not {"dates", "type", "location"} <= set(
-            k.keys()
-        ):
-            parent = [x for x in data if x["id"] == k["parent"]][0]
-            if "dates" not in k:
-                k["dates"] = parent["dates"]
-            if "type" not in k:
-                k["type"] = parent["type"]
-            if "location" not in k:
-                k["location"] = parent["location"]
-
     return data
 
 
